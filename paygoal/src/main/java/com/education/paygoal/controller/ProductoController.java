@@ -1,32 +1,36 @@
 package com.education.paygoal.controller;
 
 
-import com.education.paygoal.errores.Errores;
-import com.education.paygoal.errores.ListaVacia;
-import com.education.paygoal.errores.ValidacionLetras;
+import com.education.paygoal.errorException.ErrorException;
+import com.education.paygoal.errorException.ListaVaciaException;
+import com.education.paygoal.errorException.ValidacionLetrasException;
 import com.education.paygoal.model.Producto;
 import com.education.paygoal.repository.ProductoRepository;
 import com.education.paygoal.service.ProductoService;
 import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("api")
 public class ProductoController {
+
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(ProductoController.class);
 
     @Autowired
     ProductoService productoService;
 
     @Autowired
     ProductoRepository repository;
+
 
     /**
      *
@@ -43,10 +47,11 @@ public class ProductoController {
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto){
         try{
             if(productoService.postProducto(producto) == 0){
-                throw new ValidacionLetras();
+                throw new ValidacionLetrasException();
             }
+           logger.info("Obtengo todos los usuarios");
             return new ResponseEntity("Producto cargado", HttpStatusCode.valueOf(200));
-        }catch(Errores errores){
+        }catch(ErrorException errores){
             return new ResponseEntity(errores.getMessage(), HttpStatusCode.valueOf(400));
         }catch(Exception exception){
             return new ResponseEntity(exception.getMessage(), HttpStatusCode.valueOf(400));
@@ -71,8 +76,10 @@ public class ProductoController {
     public ResponseEntity<?> obtenerProductoPorId(@PathVariable("id") Long id,Producto producto){
         try{
             if(productoService.getIdProducto(id)== null){
+                logger.debug("El ID del producto no existe");
                 throw new Throwable("El producto no existe");
             }
+            logger.info("Obtengo el producto por ID");
              producto = productoService.getIdProducto(id);
             return new ResponseEntity<>(producto,HttpStatusCode.valueOf(200));
         }catch (Throwable throwable){
@@ -101,11 +108,14 @@ public class ProductoController {
     public ResponseEntity<?> obtenerProductoPorNombre(@PathVariable("nombre") String nombre,Producto producto){
         try{
             if(productoService.getNombreProducto(nombre) == null || productoService.getNombreProducto(nombre).isEmpty()){
-                throw new Errores("El producto no existe");
+                logger.debug("El nombre del producto no existe");
+                throw new ErrorException("El producto no existe");
+
             }
+            logger.info("Obtengo el nombre del producto");
             List<Producto> productoList = productoService.getNombreProducto(nombre);
             return new ResponseEntity<>(productoList,HttpStatusCode.valueOf(200));
-        }catch (Errores errores){
+        }catch (ErrorException errores){
             return new ResponseEntity<>(errores.getMessage(),HttpStatusCode.valueOf(400));
         }
     }
@@ -125,10 +135,12 @@ public class ProductoController {
         try{
             List<Producto> list = productoService.listaProductos();
             if(list.isEmpty()){
-                throw  new ListaVacia();
+                logger.debug("verificar la lista");
+                throw  new ListaVaciaException();
             }
+            logger.info("obtengo la lista de productos");
             return new ResponseEntity(list,HttpStatusCode.valueOf(200));
-        }catch(Errores errores){
+        }catch(ErrorException errores){
             return new ResponseEntity(errores.getMessage(),HttpStatusCode.valueOf(400));
         }
     }
@@ -153,9 +165,10 @@ public class ProductoController {
     {
         try{
             if(this.productoService.updateProductos(producto,id) == false){
+                    logger.debug("el id no existe");
                     throw  new Exception("El pedido no pudo ser actualizado");
             }
-
+            logger.info("actualizo el producto");
             return new ResponseEntity(producto,HttpStatusCode.valueOf(200));
         }catch(Exception exception){
             return new ResponseEntity(exception.getMessage(),HttpStatusCode.valueOf(400));
@@ -179,11 +192,15 @@ public class ProductoController {
     public ResponseEntity<?> borrarProducto(@PathVariable("id") Long id){
         try{
             if(productoService.deleteProducto(id) == null){
-                throw new Throwable("El producto no existe");
+                logger.info("No encuentra el ID del producto");
+                throw new ErrorException("El producto no existe");
             }
+            logger.info("borro producto");
             return new ResponseEntity<>("Producto eliminado",HttpStatusCode.valueOf(200));
-        }catch (Throwable throwable){
-            return new ResponseEntity<>(throwable.getMessage(),HttpStatusCode.valueOf(400));
+        }catch (ErrorException errorException){
+            return new ResponseEntity<>(errorException.getMessage(),HttpStatusCode.valueOf(400));
+        }catch (NullPointerException nullPointerException){
+            return new ResponseEntity<>(nullPointerException.getMessage(),HttpStatusCode.valueOf(400));
         }
     }
 
@@ -203,11 +220,12 @@ public class ProductoController {
     public ResponseEntity<List<?>> ordenarProductos(){
         try{
             List<Producto> listResponse = repository.findByOrdenByPrecio();
+            logger.info("Me trae la lista ordenada por precio");
             if(listResponse.isEmpty()){
-                throw new ListaVacia();
+                throw new ListaVaciaException();
             }
             return  ResponseEntity.ok(listResponse);
-        }catch(Errores errores){
+        }catch(ErrorException errores){
             return new  ResponseEntity(errores.getMessage(),HttpStatusCode.valueOf(400));
         }
 

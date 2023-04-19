@@ -1,13 +1,16 @@
 package com.education.paygoal.service;
 
 
-import com.education.paygoal.errores.Errores;
+import com.education.paygoal.errorException.ErrorException;
+import com.education.paygoal.errorException.ValidacionLetrasException;
 import com.education.paygoal.model.Producto;
 import com.education.paygoal.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.ErrorResponseException;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class ProductoService {
@@ -31,11 +34,11 @@ public class ProductoService {
         try{
             if(soloLetras(producto.getNombre()) == false ||
                producto.getDescripcion().isEmpty() || producto.getNombre().isEmpty()){
-                    throw new Errores("");
+                    throw new ValidacionLetrasException();
             }
             this.productoRepository.save(producto);
             return 1;
-        }catch(Errores errores){
+        }catch(ErrorException errores){
             errores.getMessage();
             return 0;
         }
@@ -58,10 +61,10 @@ public class ProductoService {
     public  List<Producto> getNombreProducto(String nombre){
         try{
         if(nombre.isEmpty() || nombre == null){
-            throw  new Errores("El nombre no es valido");
+            throw  new ErrorException("El nombre no es valido");
         }
         return this.productoRepository.encontrarProductoPorNombre(nombre);
-    }catch(Errores errores){
+    }catch(ErrorException errores){
             errores.getMessage();
             return null;
         }
@@ -80,12 +83,12 @@ public class ProductoService {
         try{
             Producto producto = this.productoRepository.encontrarEmpleadoPorId(id);
             if(producto.getId() == null){
-                throw new Throwable("El Producto no existe");
+                throw new ErrorException("El Producto no existe");
             }
             this.productoRepository.deleteById(producto.getId());
             return producto;
-        }catch(Throwable tr){
-            tr.getMessage();
+        }catch(ErrorException errorException){
+            errorException.getMessage();
             return null;
         }
     }
@@ -113,24 +116,6 @@ public class ProductoService {
       }
     }
 
-    /**
-     *
-     * @param cadena
-     * @return booleano
-     * Verifica que los caracteres ingresados sean validos.
-     * Por ejemplo en nombres y descripcion acepte solo letras.
-     *
-     */
-    public boolean soloLetras(String cadena){
-        for (int i = 0; i < cadena.length(); i++)
-        {
-            char caracter = cadena.toUpperCase().charAt(i);
-            int valorASCII = (int)caracter;
-            if (valorASCII != 165 && (valorASCII < 65 || valorASCII > 90) && valorASCII != 32)
-                return false;
-        }
-        return true;
-    }
 
     /**
      *
@@ -171,6 +156,25 @@ public class ProductoService {
     }
 
 
+
+    /**
+     *
+     * @param cadena
+     * @return booleano
+     * Verifica que los caracteres ingresados sean validos.
+     * Por ejemplo en nombres y descripcion acepte solo letras.
+     *
+     */
+    public boolean soloLetras(String cadena){
+        for (int i = 0; i < cadena.length(); i++)
+        {
+            char caracter = cadena.toUpperCase().charAt(i);
+            int valorASCII = (int)caracter;
+            if (valorASCII != 165 && (valorASCII < 65 || valorASCII > 90) && valorASCII != 32)
+                return false;
+        }
+        return true;
+    }
 
 
 
