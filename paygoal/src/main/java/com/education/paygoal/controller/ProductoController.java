@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -112,16 +113,24 @@ public class ProductoController {
     /**
      *
      * @return List de productos
-     * Recorre la lista de productos y los muestra
+     * list se carga con la lista de productos que retorna la capa service
+     *
      */
     @RequestMapping(
             method = RequestMethod.GET,
             path = "/producto",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Producto> listarProductos(){
-        List<Producto> list = productoService.listaProductos();
-        return  list;
+    public ResponseEntity<Producto> listarProductos(){
+        try{
+            List<Producto> list = productoService.listaProductos();
+            if(list.isEmpty()){
+                throw  new ListaVacia();
+            }
+            return new ResponseEntity(list,HttpStatusCode.valueOf(200));
+        }catch(Errores errores){
+            return new ResponseEntity(errores.getMessage(),HttpStatusCode.valueOf(400));
+        }
     }
 
 
