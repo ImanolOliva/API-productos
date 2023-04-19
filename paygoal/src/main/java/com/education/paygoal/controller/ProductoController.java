@@ -99,12 +99,11 @@ public class ProductoController {
     )
     public ResponseEntity<?> obtenerProductoPorNombre(@PathVariable("nombre") String nombre,Producto producto){
         try{
-            if(productoService.getNombreProducto(nombre) == null){
+            if(productoService.getNombreProducto(nombre) == null || productoService.getNombreProducto(nombre).isEmpty()){
                 throw new Errores("El producto no existe");
             }
             List<Producto> productoList = productoService.getNombreProducto(nombre);
             return new ResponseEntity<>(productoList,HttpStatusCode.valueOf(200));
-
         }catch (Errores errores){
             return new ResponseEntity<>(errores.getMessage(),HttpStatusCode.valueOf(400));
         }
