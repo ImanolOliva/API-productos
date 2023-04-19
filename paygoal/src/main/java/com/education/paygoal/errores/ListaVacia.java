@@ -1,4 +1,4 @@
-package com.education.paygoal.Errores;
+package com.education.paygoal.errores;
 
 public class ListaVacia extends  Errores{
     public ListaVacia() {

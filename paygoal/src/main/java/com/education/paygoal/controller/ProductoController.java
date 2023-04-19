@@ -1,9 +1,9 @@
 package com.education.paygoal.controller;
 
 
-import com.education.paygoal.Errores.Errores;
-import com.education.paygoal.Errores.ListaVacia;
-import com.education.paygoal.Errores.ValidacionLetras;
+import com.education.paygoal.errores.Errores;
+import com.education.paygoal.errores.ListaVacia;
+import com.education.paygoal.errores.ValidacionLetras;
 import com.education.paygoal.model.Producto;
 import com.education.paygoal.repository.ProductoRepository;
 import com.education.paygoal.service.ProductoService;
